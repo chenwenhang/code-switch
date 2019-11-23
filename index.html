@@ -1,0 +1,173 @@
+<!--
+ * @Author: Chen Wenhang
+ * @Date: 2019-11-23 13:36:37
+ * @LastEditTime: 2019-11-23 21:14:35
+ * @Description: 
+ * @Github: https://github.com/chenwenhang
+ -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <title>原码、反码、补码计算器</title>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <script src="./js/vue.min.js"></script>
+</head>
+
+<body>
+
+    <body class="bg-light">
+        <div class="container" id="app">
+            <div class="py-5 text-center">
+                <div style="height:72px"></div>
+                <h2>原码、反码、补码计算器</h2>
+                <p class="lead">方便开发者的小工具</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2 order-md-1 "></div>
+
+                <div class="col-md-8 order-md-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bit">选择位数</label>
+                            <select class="custom-select d-block w-100" id="bit" v-model="selectedBit" required="true">
+                                <option value="8">8 位</option>
+                                <option value="16">16 位</option>
+                                <option value="32">32 位</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                请选择位数
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ini_number">请输入整数：</label>
+                        <input type="text" class="form-control" id="ini_number" v-model="ini_number" placeholder=""
+                            required="true">
+                        <div class="invalid-feedback">
+                            请输入十进制整数：
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="true_form">原码：</label>
+                        <input type="text" class="form-control" id="true_form" v-model="true_form" placeholder=""
+                            required="true" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inverse_code">反码：</label>
+                        <input type="text" class="form-control" id="inverse_code" v-model="inverse_code" placeholder=""
+                            required="true" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="com_rep">补码：</label>
+                        <input type="text" class="form-control" id="com_rep" v-model="com_rep" placeholder=""
+                            required="true" readonly>
+                        <div class="invalid-feedback">
+                            请输入十进制整数：
+                        </div>
+                    </div>
+
+
+                    <button class="btn btn-primary btn-lg btn-block" v-on:click="caculate" type="button">开始计算</button>
+                </div>
+
+
+            </div>
+
+            <footer class="my-5 pt-5 text-muted text-center text-small">
+                <p class="mb-1">© 2019 Echo</p>
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="https://github.com/chenwenhang">Github</a></li>
+                </ul>
+            </footer>
+        </div>
+
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    selectedBit: 8,
+                    ini_number: '',
+                    true_form: '',
+                    inverse_code: '',
+                    com_rep: ''
+                },
+                methods: {
+                    caculate: function () {
+                        let selectedBit = parseInt(this.selectedBit);
+                        let ini_number = parseInt(this.ini_number);
+                        switch (selectedBit) {
+                            case 8:
+                                if (!(ini_number >= -128 && ini_number <= 127)) {
+                                    alert("你选择了 8 位，请确保输入在-128至127之间")
+                                    return;
+                                }
+                                break;
+                            case 16:
+                                if (!(ini_number >= -32768 && ini_number <= 32767)) {
+                                    alert("你选择了 16 位，请确保输入在-32768至32767之间")
+                                    return;
+                                }
+                                break;
+                            case 32:
+                                if (!(ini_number >= -2147483648 && ini_number <= 2147483647)) {
+                                    alert("你选择了 32 位，请确保输入在-2147483648至2147483647之间")
+                                    return;
+                                }
+                                break;
+                        }
+                        if (ini_number > 0) {
+                            this.true_form = this.inverse_code = this.com_rep = (Array(selectedBit)
+                                .join("0") + ini_number.toString(2)).slice(0 - selectedBit);
+                        } else if (ini_number === 0) {
+                            this.true_form = "+0原码: " + Array(selectedBit).join("0") +
+                                "    -0原码: " +
+                                ("1" + Array(selectedBit).join("0")).slice(0, selectedBit - 1);
+                            this.inverse_code = "+0反码: " + Array(selectedBit).join("0") +
+                                "    -0反码: " +
+                                Array(selectedBit).join("1");
+                            this.com_rep = "+0补码: " + Array(selectedBit).join("0") +
+                                "    -0补码: " +
+                                Array(selectedBit).join("1");
+                        } else {
+                            if (selectedBit === 8 && ini_number === -128 ||
+                                selectedBit === 16 && ini_number === -32768 ||
+                                selectedBit === 32 && ini_number === -2147483648) {
+                                this.true_form = "超出表示范围";
+                                this.inverse_code = "超出表示范围";
+                            } else {
+                                this.true_form = "1" + (Array(selectedBit).join("0") +
+                                    ini_number.toString(2)).slice(1 - selectedBit).replace('-', 0);
+                                this.inverse_code = "1" + (Array(selectedBit).join("0") +
+                                        ini_number.toString(2))
+                                    .slice(1 - selectedBit)
+                                    .replace('-', 0)
+                                    .split('')
+                                    .map(bit => bit == '0' ? '1' : '0')
+                                    .join('');
+                            }
+                            let fsfm_plus1 = parseInt(
+                                (Array(selectedBit).join("0") + ini_number.toString(2))
+                                .slice(1 - selectedBit)
+                                .replace('-', 0)
+                                .split('')
+                                .map(bit => bit == '0' ? '1' : '0')
+                                .join(''), 2) + 1;
+                            this.com_rep = "1" + (Array(selectedBit).join("0") +
+                                fsfm_plus1.toString(2)).slice(1 - selectedBit).replace('-', 0);
+                        }
+                    }
+                }
+            })
+        </script>
+
+    </body>
+</body>
+
+</html>
